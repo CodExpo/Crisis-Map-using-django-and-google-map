@@ -1,0 +1,434 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no"/>
+  <title>Crisis Mapping<<<<>>>>الگوی بحران</title>
+{% load static %}
+  <!-- CSS  -->
+  <link href="{% static 'waypoints/css/materialize.css'%}" type="text/css" rel="stylesheet" media="screen,projection"/>
+  <link href="{% static 'waypoints/css/style.css'%}" type="text/css" rel="stylesheet" media="screen,projection"/>
+
+<style>
+
+    .linkOFF {color: darkblue}
+    .linkON {color: white; background-color: darkblue}
+</style>
+</head>
+
+<body onload='initialize()'>
+  <nav class="red lighten-1" role="navigation">
+    <div class="nav-wrapper container">
+      <a id="logo-container" href="#" class="brand-logo left"></a>
+      <ul id="dropdown1" class="dropdown-content"style="font-color:#c72928;">
+        <li><a href="#">ثبت نام</a></li>
+        <li><a href="#">ورود</a></li>
+        <li><a href="#">گزارش‌های من</a></li>
+        <li><a href="#">درباره‌ی ما</a></li>
+</ul>
+      <ul class="right hide-on-med-and-down" >
+      <li><a class="dropdown-button" href="#!" style="color:black;" data-activates="dropdown1">فهرست<i class="mdi-navigation-arrow-drop-down right"></i></a></li>
+
+      </ul>
+
+      <ul id="nav-mobile" class="side-nav">
+        <li><a href="#">ثبت نام</a></li>
+        <li><a href="#">ورود</a></li>
+        <li><a href="#">گزارش‌های من</a></li>
+        <li><a href="#">درباره‌ی الگوی بحران</a></li>
+      </ul>
+      <a href="#" data-activates="nav-mobile" class="button-collapse" style="color:#ffebee;"><i class="mdi-navigation-menu"></i></a>
+    </div>
+  </nav>
+
+  <div class="map-wrapper" >
+<div id="map"></div></div>
+  <div class="container" id="main-container">
+<a id="button1" class="btn-floating btn-large waves-effect waves-red red lighten-5" onclick="filter(1)"><i  style="background-image:url({% static "waypoints/images/15.png" %});"></i></a>
+<br>
+<a id="button2" class="btn-floating btn-large waves-effect waves-red red lighten-5" onclick="filter(2)"><i style="background-image:url({% static "waypoints/images/16.png" %});"></i></a>
+<br>
+<a id="button3" class="btn-floating btn-large waves-effect waves-red red lighten-5" onclick="filter(3)"><i style="background-image:url({% static "waypoints/images/13.png" %});"></i></a>
+<br>
+<a id="button4" class="btn-floating btn-large waves-effect waves-red red lighten-5" onclick="filter(4)"><i class="mdi-maps-local-hospital" style="color:#c72928;font-size:45px;"></i></a>
+
+</div>
+<br>
+<br>
+<br>
+<br>
+<div class="row center" style="bottom:0;">
+
+        <a id="add" class="btn-large waves-effect waves-light red lighten-1 waves-input-wrapper modal-trigger" href="#modal1" >
+        <input style="display:none;" id="saveWaypoints" type="button" value="Save" disabled="disabled">
+        گزارش
+        </a>
+            <div id="modal1" class="modal">
+    <div class="modal-content">
+      <h4>ثبت گزارش</h4>
+      <p>یکی از گزینه‌ها را انتخاب کرده و توضیحات لازم برای امدادگر یا پناه‌جو را وارد کنید:</p>
+
+
+      <div class="row">
+
+        <form action=".">
+            {% csrf_token %}
+              <div class="col l6 s6 m6">
+    <p>
+      <input name="group1" type="radio" id="dead" checked />
+      <label for="dead">کشته</label>
+    </p>
+    <p>
+      <input name="group1" type="radio" id="injured" />
+      <label for="injured">زخمی</label>
+    </p>
+    <p>
+      <input name="group1" type="radio" id="haven"  />
+      <label for="haven">پناهگاه</label>
+    </p>
+      <p>
+        <input name="group1" type="radio" id="firstAid"  />
+        <label for="firstAid">کمک‌های اولیه</label>
+    </p>
+    </div>
+    <div class="input-field col l6 s6 m6">
+              <input id="textarea1" type="text" class="validate" length="32">
+          <label for="textarea1">توضیحات</label>
+          </div>
+
+        </form>
+
+        </div>
+
+
+    </div>
+    <div class="modal-footer">
+      <a href="." class=" modal-action modal-close waves-effect waves-green btn-flat" onclick="add()">فرستادن</a>
+    </div>
+  </div>
+  </div>
+
+        </div>
+
+  <div class="container">
+
+    <div class="section">
+
+        <br><br>
+
+        <div class="row center">
+        	<div class="col s12 m12 l12">
+          		<h5 class="red-text">گزارش‌های رسیده</h5>
+          		    <div id="waypoints" style="max-height:300px; overflow:auto;">
+    	 <ul class="collection">
+{% for waypoint in waypoints %}
+	<li id={{waypoint.id}} class='waypoint collection-item'>
+		{{ waypoint.name }} ({{waypoint.geometry.y}}, {{waypoint.geometry.x}})
+	</li>
+{% endfor %}
+
+{% for report in reports %}
+    <li id={{report.id}} class='collection-item'>
+        {{ report.reportCategory }} {{ report.reportDetails }} ({{report.geom.y}}, {{report.geom.x}}) {{report.reportDate}}
+    </li>
+{% endfor %}
+    </ul>
+    </div>
+          	</div>
+        </div>
+        <br><br>
+
+        <br><br>
+
+
+    </div>
+
+  </div>
+
+
+  <footer class="page-footer red lighten-1">
+    <div class="container">
+      <div class="row">
+        <div class="col l6 s12">
+          <h5 class="white-text">Bio</h5>
+          <p class="grey-text text-lighten-4">We are a team of college students working on this project like it's our full time job. Any amount would help support and continue development on this project and is greatly appreciated.</p>
+          <h5 class="white-text">Future</h5>
+          <p class="grey-text text-lighten-4">Android version:
+            <a class="brown-text text-lighten-3" href="{% static "waypoints/images/app-release.apk" %}">offmap</a>,
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="footer-copyright">
+      <div class="container">
+            <a class="brown-text text-lighten-3" href="https://github.com/farshadjafari">Dev:Farshad Jafari</a>,
+            <a class="brown-text text-lighten-3" href="https://ir.linkedin.com/in/helia-hashemi-01aaa0107">R&D:Helia Hashemi</a>,
+            <a class="brown-text text-lighten-3" href="https://ir.linkedin.com/in/alitalischi">UI:Ali Talischi</a>
+      </div>
+  </footer>
+
+
+
+
+  <!--  Scripts-->
+  <script src="http://code.jquery.com/jquery-1.4.4.min.js"></script>
+  <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="{% static 'waypoints/js/materialize.js'%}"></script>
+  <script src="{% static 'waypoints/js/init.js'%}"></script>
+  <script src="{% static 'waypoints/js/dict.js'%}"></script>
+  <script src="{% static 'waypoints/js/markerclusterer.js'%}"></script>
+  <script src="http://maps.google.com/maps/api/js?sensor=false"></script>
+
+  <script>
+
+      var reportByID = {};
+
+
+
+
+var marker,map,waypointByID = {};
+
+
+function initialize() {
+var iter = 0;
+if(filtern==1)
+{
+document.getElementById('button1').className='btn-floating btn-large waves-effect waves-red yellow';
+document.getElementById('button2').className='btn-floating btn-large waves-effect waves-red red lighten-5';
+document.getElementById('button3').className='btn-floating btn-large waves-effect waves-red red lighten-5';
+document.getElementById('button4').className='btn-floating btn-large waves-effect waves-red red lighten-5';
+//document.getElementById('button1').style.color = 'yellow';
+{% for report in reports %}
+if({{report.reportCategory}} == "1")
+{
+reportByID[iter] = {
+    category: "{{report.reportCategory}}",
+    lat: {{report.geom.y}},
+    lng: {{report.geom.x}}
+};
+iter++;
+}
+{% endfor %}
+}
+
+
+else if(filtern==2){
+document.getElementById('button2').className='btn-floating btn-large waves-effect waves-red yellow';
+document.getElementById('button1').className='btn-floating btn-large waves-effect waves-red red lighten-5';
+document.getElementById('button3').className='btn-floating btn-large waves-effect waves-red red lighten-5';
+document.getElementById('button4').className='btn-floating btn-large waves-effect waves-red red lighten-5';
+{% for report in reports %}
+if({{report.reportCategory}} == "2")
+{
+reportByID[iter] = {
+    category: "{{report.reportCategory}}",
+    lat: {{report.geom.y}},
+    lng: {{report.geom.x}}
+};
+iter++;
+}
+{% endfor %}
+}
+
+
+else if(filtern==3){
+document.getElementById('button3').className='btn-floating btn-large waves-effect waves-red yellow';
+document.getElementById('button2').className='btn-floating btn-large waves-effect waves-red red lighten-5';
+document.getElementById('button1').className='btn-floating btn-large waves-effect waves-red red lighten-5';
+document.getElementById('button4').className='btn-floating btn-large waves-effect waves-red red lighten-5';
+{% for report in reports %}
+if({{report.reportCategory}} == "3")
+{
+reportByID[iter] = {
+    category: "{{report.reportCategory}}",
+    lat: {{report.geom.y}},
+    lng: {{report.geom.x}}
+};
+iter++;
+}
+{% endfor %}
+}
+
+
+else if(filtern==4){
+document.getElementById('button4').className='btn-floating btn-large waves-effect waves-red yellow';
+document.getElementById('button2').className='btn-floating btn-large waves-effect waves-red red lighten-5';
+document.getElementById('button3').className='btn-floating btn-large waves-effect waves-red red lighten-5';
+document.getElementById('button1').className='btn-floating btn-large waves-effect waves-red red lighten-5';
+{% for report in reports %}
+if({{report.reportCategory}} == "4")
+{
+reportByID[iter] = {
+    category: "{{report.reportCategory}}",
+    lat: {{report.geom.y}},
+    lng: {{report.geom.x}}
+};
+iter++;
+}
+{% endfor %}
+}
+    map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 14,
+        disableDefaultUI: true,
+        center: new google.maps.LatLng(35.70465296685661, 51.408825259815444),
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    });
+console.log('hello');
+
+
+var mcOptions = {styles: [{
+height: 53,
+url: "{% static 'waypoints/images/m1.png' %}",
+width: 53
+},
+{
+height: 56,
+url: "{% static 'waypoints/images/m2.png' %}",
+width: 56
+},
+{
+height: 66,
+url: "{% static 'waypoints/images/m3.png' %}",
+width: 66
+},
+{
+height: 78,
+url: "{% static 'waypoints/images/m4.png' %}",
+width: 78
+},
+{
+height: 90,
+url: "{% static 'waypoints/images/m5.png' %}",
+width: 90
+}]}
+
+    var markers = [];
+    for(var i=0;i<iter;i++){
+        //console.log(reportByID[i].lat);
+        var latLng = new google.maps.LatLng(
+                            reportByID[i].lat,
+                            reportByID[i].lng);
+        var marker = new google.maps.Marker({
+            position: latLng,
+            map: map
+        });
+        marker.setIcon("{% static 'waypoints/images/m1.png' %}");
+        markers.push(marker);
+    }
+    var markerCluster = new MarkerClusterer(map, markers, mcOptions);
+    document.querySelector('.waypoint').click();
+}
+
+{% for waypoint in waypoints %}
+waypointByID[{{waypoint.id}}] = {
+    name: "{{waypoint.name}}",
+    lat: {{waypoint.geometry.y}},
+    lng: {{waypoint.geometry.x}}
+};
+{% endfor %}
+
+
+var currentObject;
+
+$(document).ready(function () {
+    function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+var csrftoken = getCookie('csrftoken');
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+function sameOrigin(url) {
+    // test that a given url is a same-origin URL
+    // url could be relative or scheme relative or absolute
+    var host = document.location.host; // host + port
+    var protocol = document.location.protocol;
+    var sr_origin = '//' + host;
+    var origin = protocol + sr_origin;
+    // Allow absolute or scheme relative URLs to same origin
+    return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+        (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+        // or any other URL that isn't scheme relative or absolute i.e relative.
+        !(/^(\/\/|http:|https:).*/.test(url));
+}
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && sameOrigin(settings.url)) {
+            // Send the token to same-origin, relative URLs only.
+            // Send the token only if the method warrants CSRF protection
+            // Using the CSRFToken value acquired earlier
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    }
+});
+    function activateWaypoints() {
+        // Add waypoint click handler
+        $('.waypoint').each(function () {
+            $(this).click(function() {
+
+                var waypoint = waypointByID[this.id];
+                var center = new google.maps.LatLng(waypoint.lat, waypoint.lng);
+                currentObject = $(this);
+                if (marker) marker.setMap();
+                marker = new google.maps.Marker({map: map, position: center, draggable: true});
+                $('#saveWaypoints').removeAttr('disabled');
+                google.maps.event.addListener(marker, 'dragend', function() {
+                    var position = marker.getPosition();
+                    waypoint.lat = position.lat();
+                    waypoint.lng = position.lng();
+                    currentObject.html(waypoint.name +
+                        ' (' + waypoint.lat +
+                        ', ' + waypoint.lng + ')');
+                });
+                map.panTo(center);
+            }).hover(
+                function () {this.className = this.className.replace('OFF', 'ON');},
+                function () {this.className = this.className.replace('ON', 'OFF');}
+            );
+        });
+    }
+
+    $('#saveWaypoints').click(function () {
+
+        var waypointStrings = [];
+        var reportStrings = [];
+        for (id in waypointByID) {
+            waypoint = waypointByID[id];
+            waypointStrings.push(id + ' ' + waypoint.lng + ' ' + waypoint.lat);
+            reportStrings.push( categorySelected + ' ' + waypoint.lng + ' ' + waypoint.lat);
+            break;
+        };
+        $.post("{% url 'waypoints_save' %}", {
+            waypointsPayload: waypointStrings.join('\n'),
+            reportPayload: reportStrings.join('\n'),
+            detailsAdded: detailsAdded,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        }, function (data) {
+            if (data.isOk) {
+                $('#saveWaypoints').attr('disabled', 'disabled');
+            } else {
+                alert(data.message);
+            }
+        });
+    });
+    activateWaypoints();
+});
+</script>
+  </body>
+</html>

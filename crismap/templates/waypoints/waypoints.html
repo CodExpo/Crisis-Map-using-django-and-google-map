@@ -1,0 +1,14 @@
+
+ <ul class="collection">
+{% for waypoint in waypoints %}
+	<li id={{waypoint.id}} class='waypoint collection-item'>
+		{{ waypoint.name }} ({{waypoint.geometry.y}}, {{waypoint.geometry.x}})
+	</li>
+{% endfor %}
+
+{% for report in reports %}
+    <li id={{report.id}} class='collection-item'>
+        {{ report.reportCategory }} {{ report.reportDetails }} ({{report.geom.y}}, {{report.geom.x}}) {{report.reportDate}}
+    </li>
+{% endfor %}
+    </ul>
